@@ -29,31 +29,26 @@ export function ProjectViewer({ project, onAddClick }: Props) {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card/40 px-4 py-2.5">
-        <div className="min-w-0">
-          <h1 className="truncate text-base tracking-tight">{project.name}</h1>
-          <p className="truncate text-xs text-muted-foreground">{project.url}</p>
-        </div>
-        <a
-          href={project.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-border bg-background/40 px-3 py-1.5 text-xs text-foreground hover:bg-accent hover:text-accent-foreground"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Öppna i ny flik
-        </a>
-      </div>
-      <div className="flex-1 bg-background">
-        <iframe
-          key={project.id}
-          src={project.url}
-          title={project.name}
-          className="h-full w-full border-0"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals"
-        />
-      </div>
-    </div>
+    <iframe
+      key={project.id}
+      src={project.url}
+      title={project.name}
+      className="h-full w-full border-0 bg-background"
+      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals"
+    />
+  );
+}
+
+export function OpenInNewTabButton({ project }: { project: Project }) {
+  return (
+    <a
+      href={project.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-border bg-background/40 px-2.5 py-1 text-xs text-foreground hover:bg-accent hover:text-accent-foreground"
+    >
+      <ExternalLink className="h-3.5 w-3.5" />
+      Öppna i ny flik
+    </a>
   );
 }

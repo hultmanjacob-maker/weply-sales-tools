@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { ProjectViewer } from "@/components/ProjectViewer";
+import { ProjectViewer, OpenInNewTabButton } from "@/components/ProjectViewer";
 import { AddProjectDialog } from "@/components/AddProjectDialog";
 import { useProjects } from "@/hooks/useProjects";
 
@@ -26,7 +26,14 @@ function Dashboard() {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "12rem",
+          "--sidebar-width-icon": "3rem",
+        } as React.CSSProperties
+      }
+    >
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar
           projects={projects}
@@ -35,12 +42,13 @@ function Dashboard() {
           onAdd={addProject}
           onRemove={removeProject}
         />
-        <div className="flex flex-1 flex-col">
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border bg-card/30 px-3">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-card/30 px-2">
             <SidebarTrigger />
-            <div className="ml-1 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Säljplattform
+            <div className="min-w-0 flex-1 truncate text-xs tracking-tight text-muted-foreground">
+              {selected ? selected.name : "Säljplattform"}
             </div>
+            {selected && <OpenInNewTabButton project={selected} />}
           </header>
           <main className="flex-1 overflow-hidden">
             <ProjectViewer project={selected} onAddClick={() => setAddOpen(true)} />
