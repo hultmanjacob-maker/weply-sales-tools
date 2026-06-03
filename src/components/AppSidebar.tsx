@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Briefcase } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -31,14 +31,14 @@ export function AppSidebar({ projects, selectedId, onSelect, onAdd, onRemove }: 
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-primary/15 text-primary">
-            <Briefcase className="h-4 w-4" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-primary/15 text-lg">
+            <span role="img" aria-label="tools">🧰</span>
           </div>
           <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
             <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Plattform
+              Platform
             </span>
-            <span className="text-base font-semibold tracking-tight">Säljprojekt</span>
+            <span className="text-base font-semibold tracking-tight">Sales Tools</span>
           </div>
         </div>
       </SidebarHeader>
