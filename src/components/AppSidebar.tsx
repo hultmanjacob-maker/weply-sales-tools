@@ -33,7 +33,7 @@ type Props = {
 };
 
 
-export function AppSidebar({ projects, selectedId, onSelect, onAdd, onRemove }: Props) {
+export function AppSidebar({ country, onCountryChange, projects, selectedId, onSelect, onAdd, onRemove }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
