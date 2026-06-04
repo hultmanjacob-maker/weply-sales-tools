@@ -54,9 +54,36 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
 
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupContent>
+            <div className="flex gap-1 rounded-md border border-sidebar-border bg-sidebar-accent/30 p-0.5 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-0.5 group-data-[collapsible=icon]:p-0.5">
+              {COUNTRIES.map((c) => {
+                const active = country === c.code;
+                return (
+                  <button
+                    key={c.code}
+                    onClick={() => onCountryChange(c.code)}
+                    title={c.label}
+                    aria-pressed={active}
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-sm px-2 py-1 text-xs font-medium transition-colors group-data-[collapsible=icon]:px-0 ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    <span aria-hidden>{c.flag}</span>
+                    <span className="group-data-[collapsible=icon]:hidden">{c.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel className="text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">
             Projekt
           </SidebarGroupLabel>
+
           <SidebarGroupContent>
             <SidebarMenu>
               {projects.length === 0 && (
