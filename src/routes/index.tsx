@@ -4,26 +4,29 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProjectViewer, OpenInNewTabButton } from "@/components/ProjectViewer";
 import { AddProjectDialog } from "@/components/AddProjectDialog";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjects, type Country } from "@/hooks/useProjects";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Säljplattform — Dina projekt" },
+      { title: "Sales Tools — Dina projekt" },
       { name: "description", content: "Samla och visa alla dina Lovable-säljprojekt på ett ställe." },
     ],
   }),
   component: Dashboard,
 });
 
-function Dashboard() {
-  const { projects, selected, selectedId, setSelectedId, addProject, removeProject, hydrated } =
-    useProjects();
-  const [addOpen, setAddOpen] = useState(false);
+const COUNTRIES: { code: Country; label: string; flag: string }[] = [
+  { code: "SE", label: "SE", flag: "🇸🇪" },
+  { code: "NO", label: "NO", flag: "🇳🇴" },
+  { code: "DK", label: "DK", flag: "🇩🇰" },
+];
 
-  if (!hydrated) {
-    return <div className="min-h-screen bg-background" />;
-  }
+function Dashboard() {
+  const [country, setCountry] = useState<Country>("SE");
+  const { projects, selected, selectedId, setSelectedId, addProject, removeProject, hydrated } =
+    useProjects(country);
+  const [addOpen, setAddOpen] = useState(false);
 
   return (
     <SidebarProvider
@@ -42,15 +45,37 @@ function Dashboard() {
           onAdd={addProject}
           onRemove={removeProject}
         />
-        <main className="relative flex min-w-0 flex-1">
-          <SidebarTrigger className="absolute left-2 top-2 z-10 bg-card/70 backdrop-blur hover:bg-card" />
-          {selected && (
-            <div className="absolute right-2 top-2 z-10">
-              <OpenInNewTabButton project={selected} />
+        <main className="relative flex min-w-0 flex-1 flex-col">
+          <div className="flex h-11 shrink-0 items-center gap-2 border-b border-border bg-card/40 px-2 backdrop-blur">
+            <SidebarTrigger className="hover:bg-card" />
+            <div className="ml-1 flex items-center gap-1 rounded-md border border-border bg-background/40 p-0.5">
+              {COUNTRIES.map((c) => {
+                const active = country === c.code;
+                return (
+                  <button
+                    key={c.code}
+                    onClick={() => setCountry(c.code)}
+                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-medium transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                    aria-pressed={active}
+                  >
+                    <span aria-hidden>{c.flag}</span>
+                    <span>{c.label}</span>
+                  </button>
+                );
+              })}
             </div>
-          )}
-          <div className="flex-1 overflow-hidden">
-            <ProjectViewer project={selected} onAddClick={() => setAddOpen(true)} />
+            <div className="ml-auto">{selected && <OpenInNewTabButton project={selected} />}</div>
+          </div>
+          <div className="relative flex-1 overflow-hidden">
+            {!hydrated ? (
+              <div className="h-full w-full" />
+            ) : (
+              <ProjectViewer project={selected} onAddClick={() => setAddOpen(true)} />
+            )}
           </div>
         </main>
       </div>
