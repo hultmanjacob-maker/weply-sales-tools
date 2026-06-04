@@ -16,18 +16,21 @@ export type Database = {
     Tables: {
       projects: {
         Row: {
+          country: string
           created_at: string
           id: string
           name: string
           url: string
         }
         Insert: {
+          country?: string
           created_at?: string
           id?: string
           name: string
           url: string
         }
         Update: {
+          country?: string
           created_at?: string
           id?: string
           name?: string
