@@ -14,15 +14,24 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { AddProjectDialog } from "./AddProjectDialog";
-import type { Project } from "@/hooks/useProjects";
+import type { Project, Country } from "@/hooks/useProjects";
+
+const COUNTRIES: { code: Country; label: string; flag: string }[] = [
+  { code: "NO", label: "NO", flag: "🇳🇴" },
+  { code: "SE", label: "SE", flag: "🇸🇪" },
+  { code: "DK", label: "DK", flag: "🇩🇰" },
+];
 
 type Props = {
+  country: Country;
+  onCountryChange: (c: Country) => void;
   projects: Project[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   onAdd: (name: string, url: string) => void;
   onRemove: (id: string) => void;
 };
+
 
 export function AppSidebar({ projects, selectedId, onSelect, onAdd, onRemove }: Props) {
   const [open, setOpen] = useState(false);
