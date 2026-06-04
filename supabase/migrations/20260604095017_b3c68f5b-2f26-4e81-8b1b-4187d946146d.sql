@@ -1,0 +1,1 @@
+UPDATE public.projects SET country = 'NO' WHERE country = 'SE';

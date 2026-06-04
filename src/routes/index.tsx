@@ -23,7 +23,7 @@ const COUNTRIES: { code: Country; label: string; flag: string }[] = [
 ];
 
 function Dashboard() {
-  const [country, setCountry] = useState<Country>("SE");
+  const [country, setCountry] = useState<Country>("NO");
   const { projects, selected, selectedId, setSelectedId, addProject, removeProject, hydrated } =
     useProjects(country);
   const [addOpen, setAddOpen] = useState(false);
@@ -39,6 +39,8 @@ function Dashboard() {
     >
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar
+          country={country}
+          onCountryChange={setCountry}
           projects={projects}
           selectedId={selectedId}
           onSelect={setSelectedId}
@@ -48,26 +50,6 @@ function Dashboard() {
         <main className="relative flex min-w-0 flex-1 flex-col">
           <div className="flex h-11 shrink-0 items-center gap-2 border-b border-border bg-card/40 px-2 backdrop-blur">
             <SidebarTrigger className="hover:bg-card" />
-            <div className="ml-1 flex items-center gap-1 rounded-md border border-border bg-background/40 p-0.5">
-              {COUNTRIES.map((c) => {
-                const active = country === c.code;
-                return (
-                  <button
-                    key={c.code}
-                    onClick={() => setCountry(c.code)}
-                    className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-medium transition-colors ${
-                      active
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    }`}
-                    aria-pressed={active}
-                  >
-                    <span aria-hidden>{c.flag}</span>
-                    <span>{c.label}</span>
-                  </button>
-                );
-              })}
-            </div>
             <div className="ml-auto">{selected && <OpenInNewTabButton project={selected} />}</div>
           </div>
           <div className="relative flex-1 overflow-hidden">
@@ -83,3 +65,4 @@ function Dashboard() {
     </SidebarProvider>
   );
 }
+
