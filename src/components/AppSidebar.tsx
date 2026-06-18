@@ -106,7 +106,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                         selectedId === p.id ? "bg-primary" : "bg-muted-foreground/40"
                       }`}
                     />
-                    <span className="truncate">{p.name}</span>
+                    <span className="break-words leading-tight">{p.name}</span>
                   </SidebarMenuButton>
                   <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 items-center gap-0.5 group-hover/item:flex group-data-[collapsible=icon]:!hidden">
                     <button
