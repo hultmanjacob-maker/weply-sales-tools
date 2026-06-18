@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -38,6 +38,7 @@ type Props = {
 
 export function AppSidebar({ country, onCountryChange, projects, selectedId, onSelect, onAdd, onRemove, onMove }: Props) {
   const [open, setOpen] = useState(false);
+  const [addExpanded, setAddExpanded] = useState(false);
 
   return (
     <Sidebar collapsible="icon">
@@ -168,14 +169,32 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        <Button
-          onClick={() => setOpen(true)}
-          className="w-full justify-start gap-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-          variant="default"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">Nytt projekt</span>
-        </Button>
+        <div className="flex flex-col gap-1 p-2">
+          <button
+            onClick={() => setAddExpanded((v) => !v)}
+            className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
+          >
+            <span className="flex items-center gap-2">
+              <Plus className="h-3.5 w-3.5" />
+              Nytt projekt
+            </span>
+            {addExpanded ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
+          </button>
+          {addExpanded && (
+            <Button
+              onClick={() => setOpen(true)}
+              className="w-full justify-start gap-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+              variant="default"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="group-data-[collapsible=icon]:hidden">Nytt projekt</span>
+            </Button>
+          )}
+        </div>
       </SidebarFooter>
 
       <AddProjectDialog open={open} onOpenChange={setOpen} onAdd={onAdd} />
