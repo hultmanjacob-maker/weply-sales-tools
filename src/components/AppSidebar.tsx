@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AddProjectDialog } from "./AddProjectDialog";
 import type { Project, Country } from "@/hooks/useProjects";
+import { getProjectPalette, getProjectEmoji } from "@/lib/projectVisual";
 
 const COUNTRIES: { code: Country; label: string; flag: string }[] = [
   { code: "NO", label: "NO", flag: "🇳🇴" },
@@ -82,8 +83,13 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">
-            Projekt
+          <SidebarGroupLabel className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">
+            <span>Projekt</span>
+            {projects.length > 0 && (
+              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">
+                {projects.length}
+              </span>
+            )}
           </SidebarGroupLabel>
 
           <SidebarGroupContent>
@@ -93,57 +99,69 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                   Inga projekt än.
                 </p>
               )}
-              {projects.map((p, i) => (
-                <SidebarMenuItem key={p.id} className="group/item relative">
-                  <SidebarMenuButton
-                    isActive={selectedId === p.id}
-                    onClick={() => onSelect(p.id)}
-                    tooltip={p.name}
-                    className="pr-20"
-                  >
-                    <span
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                        selectedId === p.id ? "bg-primary" : "bg-muted-foreground/40"
+              {projects.map((p, i) => {
+                const palette = getProjectPalette(p.name);
+                const emoji = getProjectEmoji(p.name);
+                const isActive = selectedId === p.id;
+                return (
+                  <SidebarMenuItem key={p.id} className="group/item relative">
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      onClick={() => onSelect(p.id)}
+                      tooltip={p.name}
+                      className={`h-auto items-start gap-3 rounded-lg py-2 pr-20 transition-all ${
+                        isActive
+                          ? "border border-white/10 bg-white/[0.06] shadow-sm"
+                          : "border border-transparent hover:bg-white/[0.04]"
                       }`}
-                    />
-                    <span className="break-words leading-tight">{p.name}</span>
-                  </SidebarMenuButton>
-                  <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 items-center gap-0.5 group-hover/item:flex group-data-[collapsible=icon]:!hidden">
-                    <button
-                      aria-label={`Flytta upp ${p.name}`}
-                      disabled={i === 0}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMove(p.id, "up");
-                      }}
-                      className="rounded-sm p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
                     >
-                      <ChevronUp className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      aria-label={`Flytta ner ${p.name}`}
-                      disabled={i === projects.length - 1}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMove(p.id, "down");
-                      }}
-                      className="rounded-sm p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
-                    >
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      aria-label={`Ta bort ${p.name}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`Ta bort "${p.name}"?`)) onRemove(p.id);
-                      }}
-                      className="rounded-sm p-0.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </SidebarMenuItem>
-              ))}
+                      <span
+                        aria-hidden
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-base shadow-sm ${palette.bg} ${palette.border} ${palette.text} ${palette.glow}`}
+                      >
+                        {emoji}
+                      </span>
+                      <span className="min-w-0 break-words text-sm leading-tight">
+                        {p.name}
+                      </span>
+                    </SidebarMenuButton>
+                    <div className="absolute right-1 top-1.5 hidden items-center gap-0.5 group-hover/item:flex group-data-[collapsible=icon]:!hidden">
+                      <button
+                        aria-label={`Flytta upp ${p.name}`}
+                        disabled={i === 0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onMove(p.id, "up");
+                        }}
+                        className="rounded-sm p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        aria-label={`Flytta ner ${p.name}`}
+                        disabled={i === projects.length - 1}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onMove(p.id, "down");
+                        }}
+                        className="rounded-sm p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        aria-label={`Ta bort ${p.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Ta bort "${p.name}"?`)) onRemove(p.id);
+                        }}
+                        className="rounded-sm p-0.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
