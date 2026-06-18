@@ -20,6 +20,7 @@ const COUNTRIES: { code: Country; label: string; flag: string }[] = [
   { code: "SE", label: "SE", flag: "🇸🇪" },
   { code: "NO", label: "NO", flag: "🇳🇴" },
   { code: "DK", label: "DK", flag: "🇩🇰" },
+  { code: "NL", label: "NL", flag: "🇳🇱" },
 ];
 
 function Dashboard() {
