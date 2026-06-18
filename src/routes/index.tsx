@@ -25,7 +25,7 @@ const COUNTRIES: { code: Country; label: string; flag: string }[] = [
 
 function Dashboard() {
   const [country, setCountry] = useState<Country>("NO");
-  const { projects, selected, selectedId, setSelectedId, addProject, removeProject, hydrated } =
+  const { projects, selected, selectedId, setSelectedId, addProject, removeProject, moveProject, hydrated } =
     useProjects(country);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -47,6 +47,7 @@ function Dashboard() {
           onSelect={setSelectedId}
           onAdd={addProject}
           onRemove={removeProject}
+          onMove={moveProject}
         />
         <main className="relative flex min-w-0 flex-1 flex-col">
           <div className="flex h-11 shrink-0 items-center gap-2 border-b border-border bg-card/40 px-2 backdrop-blur">

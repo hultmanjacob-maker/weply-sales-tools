@@ -14,7 +14,7 @@ export type Project = {
 const SELECTED_KEY_PREFIX = "sales-platform.selectedProjectId.v2.";
 const LEGACY_STORAGE_KEY = "sales-platform.projects.v1";
 
-type Row = { id: string; name: string; url: string; country: string; created_at: string };
+type Row = { id: string; name: string; url: string; country: string; created_at: string; position: number };
 
 function rowToProject(r: Row): Project {
   return {
@@ -36,6 +36,7 @@ export function useProjects(country: Country) {
       .from("projects")
       .select("*")
       .eq("country", c)
+      .order("position", { ascending: true })
       .order("created_at", { ascending: true });
     if (error) {
       console.error("Failed to load projects", error);
@@ -114,9 +115,10 @@ export function useProjects(country: Country) {
 
   const addProject = useCallback(
     async (name: string, url: string) => {
+      const nextPos = projects.length;
       const { data, error } = await supabase
         .from("projects")
-        .insert({ name: name.trim(), url: url.trim(), country })
+        .insert({ name: name.trim(), url: url.trim(), country, position: nextPos })
         .select()
         .single();
       if (error || !data) {
@@ -128,7 +130,7 @@ export function useProjects(country: Country) {
       setSelectedId(project.id);
       return project;
     },
-    [country, setSelectedId],
+    [country, projects.length, setSelectedId],
   );
 
   const removeProject = useCallback(
@@ -149,6 +151,27 @@ export function useProjects(country: Country) {
     [selectedId, setSelectedId],
   );
 
+  const moveProject = useCallback(
+    async (id: string, direction: "up" | "down") => {
+      const idx = projects.findIndex((p) => p.id === id);
+      if (idx === -1) return;
+      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= projects.length) return;
+      const next = [...projects];
+      [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
+      setProjects(next);
+      const results = await Promise.all(
+        next.map((p, i) => supabase.from("projects").update({ position: i }).eq("id", p.id)),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) {
+        console.error("Failed to reorder", failed.error);
+        load(country);
+      }
+    },
+    [projects, country, load],
+  );
+
   const selected = projects.find((p) => p.id === selectedId) ?? null;
 
   return {
@@ -158,6 +181,7 @@ export function useProjects(country: Country) {
     setSelectedId,
     addProject,
     removeProject,
+    moveProject,
     hydrated,
   };
 }
