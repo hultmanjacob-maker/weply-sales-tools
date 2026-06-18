@@ -44,7 +44,7 @@ const EMOJI_OVERRIDES: Record<string, string> = {
   "call time": "📞",
   "current competition": "🏆",
   "current competetion": "🏆",
-  "client map": "🗺️",
+  "client map": "📍",
   "arr overview": "💰",
   "total mrr": "📈",
 };
