@@ -18,10 +18,10 @@ import type { Project, Country } from "@/hooks/useProjects";
 import { getProjectPalette, getProjectEmoji } from "@/lib/projectVisual";
 
 const COUNTRIES: { code: Country; label: string; flag: string }[] = [
-  { code: "NO", label: "NO", flag: "🇳🇴" },
-  { code: "SE", label: "SE", flag: "🇸🇪" },
-  { code: "DK", label: "DK", flag: "🇩🇰" },
-  { code: "NL", label: "NL", flag: "🇳🇱" },
+  { code: "NO", label: "Norge", flag: "🇳🇴" },
+  { code: "SE", label: "Sverige", flag: "🇸🇪" },
+  { code: "DK", label: "Danmark", flag: "🇩🇰" },
+  { code: "NL", label: "Nederländerna", flag: "🇳🇱" },
 ];
 
 type Props = {
@@ -58,7 +58,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
       <SidebarContent>
         <SidebarGroup className="px-2">
           <SidebarGroupContent>
-            <div className="grid grid-cols-4 gap-0.5 rounded-md border border-sidebar-border bg-sidebar-accent/30 p-0.5 group-data-[collapsible=icon]:grid-cols-1">
+            <div className="grid grid-cols-2 gap-1 rounded-md border border-sidebar-border bg-sidebar-accent/30 p-1 group-data-[collapsible=icon]:grid-cols-1">
               {COUNTRIES.map((c) => {
                 const active = country === c.code;
                 return (
@@ -67,14 +67,14 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                     onClick={() => onCountryChange(c.code)}
                     title={c.label}
                     aria-pressed={active}
-                    className={`flex min-w-0 items-center justify-center gap-1 rounded-sm px-1 py-1 text-[11px] font-medium leading-none transition-colors ${
+                    className={`flex min-w-0 items-center justify-center gap-1.5 rounded-sm px-2 py-1.5 text-[11px] font-medium leading-none transition-colors ${
                       active
                         ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     }`}
                   >
                     <span aria-hidden className="text-sm">{c.flag}</span>
-                    <span className="group-data-[collapsible=icon]:hidden">{c.label}</span>
+                    <span className="truncate group-data-[collapsible=icon]:hidden">{c.label}</span>
                   </button>
                 );
               })}
@@ -121,7 +121,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                       >
                         {emoji}
                       </span>
-                      <span className="min-w-0 break-words text-sm leading-tight">
+                      <span className="min-w-0 whitespace-normal break-words text-sm leading-tight">
                         {p.name}
                       </span>
                     </SidebarMenuButton>

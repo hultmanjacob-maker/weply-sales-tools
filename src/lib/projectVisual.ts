@@ -40,8 +40,18 @@ export function getProjectPalette(name: string): ProjectPalette {
   return PALETTES[h % PALETTES.length];
 }
 
+const EMOJI_OVERRIDES: Record<string, string> = {
+  "call time": "📞",
+  "current competition": "🏆",
+  "current competetion": "🏆",
+  "client map": "🗺️",
+  "arr overview": "💰",
+  "total mrr": "📈",
+};
+
 export function getProjectEmoji(name: string): string {
-  const h = hashString(name.toLowerCase().trim() || "x");
-  // Offset so emoji/palette aren't perfectly correlated
+  const key = name.toLowerCase().trim();
+  if (EMOJI_OVERRIDES[key]) return EMOJI_OVERRIDES[key];
+  const h = hashString(key || "x");
   return EMOJIS[(h >>> 3) % EMOJIS.length];
 }
