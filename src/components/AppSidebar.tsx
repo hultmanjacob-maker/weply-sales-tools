@@ -38,6 +38,7 @@ type Props = {
 
 export function AppSidebar({ country, onCountryChange, projects, selectedId, onSelect, onAdd, onRemove, onMove }: Props) {
   const [open, setOpen] = useState(false);
+  const [addExpanded, setAddExpanded] = useState(false);
 
   return (
     <Sidebar collapsible="icon">
