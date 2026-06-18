@@ -17,10 +17,10 @@ export const Route = createFileRoute("/")({
 });
 
 const COUNTRIES: { code: Country; label: string; flag: string }[] = [
-  { code: "SE", label: "SE", flag: "🇸🇪" },
-  { code: "NO", label: "NO", flag: "🇳🇴" },
-  { code: "DK", label: "DK", flag: "🇩🇰" },
-  { code: "NL", label: "NL", flag: "🇳🇱" },
+  { code: "SE", label: "Sweden", flag: "🇸🇪" },
+  { code: "NO", label: "Norway", flag: "🇳🇴" },
+  { code: "DK", label: "Denmark", flag: "🇩🇰" },
+  { code: "NL", label: "Netherlands", flag: "🇳🇱" },
 ];
 
 function Dashboard() {
