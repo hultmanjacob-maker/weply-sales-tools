@@ -51,7 +51,9 @@ const EMOJI_OVERRIDES: Record<string, string> = {
 
 export function getProjectEmoji(name: string): string {
   const key = name.toLowerCase().trim();
-  if (EMOJI_OVERRIDES[key]) return EMOJI_OVERRIDES[key];
+  for (const [phrase, emoji] of Object.entries(EMOJI_OVERRIDES)) {
+    if (key.includes(phrase)) return emoji;
+  }
   const h = hashString(key || "x");
   return EMOJIS[(h >>> 3) % EMOJIS.length];
 }
