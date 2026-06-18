@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type Country = "SE" | "NO" | "DK";
+export type Country = "SE" | "NO" | "DK" | "NL";
 
 export type Project = {
   id: string;
