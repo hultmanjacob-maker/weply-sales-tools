@@ -18,10 +18,10 @@ import type { Project, Country } from "@/hooks/useProjects";
 import { getProjectPalette, getProjectEmoji } from "@/lib/projectVisual";
 
 const COUNTRIES: { code: Country; label: string; flag: string }[] = [
-  { code: "NO", label: "NO", flag: "🇳🇴" },
-  { code: "SE", label: "SE", flag: "🇸🇪" },
-  { code: "DK", label: "DK", flag: "🇩🇰" },
-  { code: "NL", label: "NL", flag: "🇳🇱" },
+  { code: "NO", label: "Norge", flag: "🇳🇴" },
+  { code: "SE", label: "Sverige", flag: "🇸🇪" },
+  { code: "DK", label: "Danmark", flag: "🇩🇰" },
+  { code: "NL", label: "Nederländerna", flag: "🇳🇱" },
 ];
 
 type Props = {
