@@ -121,7 +121,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                       >
                         {emoji}
                       </span>
-                      <span className="min-w-0 break-words text-sm leading-tight">
+                      <span className="min-w-0 whitespace-normal break-words text-sm leading-tight">
                         {p.name}
                       </span>
                     </SidebarMenuButton>
