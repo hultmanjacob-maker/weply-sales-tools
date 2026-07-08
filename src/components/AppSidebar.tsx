@@ -85,7 +85,7 @@ export function AppSidebar({
           <SidebarGroup>
             <SidebarGroupLabel className="flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">
               <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-              <span>Favoriter</span>
+              <span>Favorites</span>
               <span className="ml-auto rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">
                 {favorites.length}
               </span>
