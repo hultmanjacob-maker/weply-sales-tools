@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight, Star, BarChart3, LogIn, LogOut } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { AddProjectDialog } from "./AddProjectDialog";
 import type { Project, Country } from "@/hooks/useProjects";
+import { useFavorites } from "@/hooks/useProjects";
+import { useAuth } from "@/hooks/useAuth";
 import { getProjectPalette, getProjectEmoji } from "@/lib/projectVisual";
 
 const COUNTRIES: { code: Country; label: string; flag: string }[] = [
@@ -24,21 +27,42 @@ const COUNTRIES: { code: Country; label: string; flag: string }[] = [
   { code: "NL", label: "Netherlands", flag: "🇳🇱" },
 ];
 
+const COUNTRY_FLAG: Record<string, string> = {
+  NO: "🇳🇴",
+  SE: "🇸🇪",
+  DK: "🇩🇰",
+  NL: "🇳🇱",
+};
+
 type Props = {
   country: Country;
   onCountryChange: (c: Country) => void;
   projects: Project[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onSelectFavorite: (project: Project) => void;
   onAdd: (name: string, url: string) => void;
   onRemove: (id: string) => void;
   onMove: (id: string, direction: "up" | "down") => void;
+  onToggleFavorite: (id: string) => void;
 };
 
-
-export function AppSidebar({ country, onCountryChange, projects, selectedId, onSelect, onAdd, onRemove, onMove }: Props) {
+export function AppSidebar({
+  country,
+  onCountryChange,
+  projects,
+  selectedId,
+  onSelect,
+  onSelectFavorite,
+  onAdd,
+  onRemove,
+  onMove,
+  onToggleFavorite,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [addExpanded, setAddExpanded] = useState(false);
+  const favorites = useFavorites();
+  const { isAdmin, user, signOut } = useAuth();
 
   return (
     <Sidebar collapsible="icon">
@@ -57,6 +81,58 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
       </SidebarHeader>
 
       <SidebarContent>
+        {favorites.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span>Favoriter</span>
+              <span className="ml-auto rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">
+                {favorites.length}
+              </span>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {favorites.map((p) => {
+                  const palette = getProjectPalette(p.name);
+                  const emoji = getProjectEmoji(p.name);
+                  const isActive = selectedId === p.id && country === p.country;
+                  return (
+                    <SidebarMenuItem key={`fav-${p.id}`}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        onClick={() => onSelectFavorite(p)}
+                        tooltip={`${p.name} (${p.country})`}
+                        className={`h-auto items-center gap-2.5 rounded-lg py-1.5 transition-all ${
+                          isActive
+                            ? "border border-white/10 bg-white/[0.06]"
+                            : "border border-transparent hover:bg-white/[0.04]"
+                        }`}
+                      >
+                        <span
+                          aria-hidden
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-sm ${palette.bg} ${palette.border} ${palette.text}`}
+                        >
+                          {emoji}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-sm">{p.name}</span>
+                        <span
+                          aria-label={p.country}
+                          className="shrink-0 rounded-sm border border-border/60 bg-background/60 px-1 py-0.5 text-[9px] font-bold tracking-wider text-muted-foreground group-data-[collapsible=icon]:hidden"
+                        >
+                          <span className="mr-0.5" aria-hidden>
+                            {COUNTRY_FLAG[p.country]}
+                          </span>
+                          {p.country}
+                        </span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <SidebarGroup className="px-2">
           <SidebarGroupContent>
             <div className="grid grid-cols-2 gap-1 rounded-md border border-sidebar-border bg-sidebar-accent/30 p-1 group-data-[collapsible=icon]:grid-cols-1">
@@ -110,7 +186,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                       isActive={isActive}
                       onClick={() => onSelect(p.id)}
                       tooltip={p.name}
-                      className={`h-auto items-start gap-3 rounded-lg py-2 pr-20 transition-all ${
+                      className={`h-auto items-start gap-3 rounded-lg py-2 pr-24 transition-all ${
                         isActive
                           ? "border border-white/10 bg-white/[0.06] shadow-sm"
                           : "border border-transparent hover:bg-white/[0.04]"
@@ -126,7 +202,21 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                         {p.name}
                       </span>
                     </SidebarMenuButton>
-                    <div className="absolute right-1 top-1.5 hidden items-center gap-0.5 group-hover/item:flex group-data-[collapsible=icon]:!hidden">
+                    <div className="absolute right-1 top-1.5 flex items-center gap-0.5 group-data-[collapsible=icon]:!hidden">
+                      <button
+                        aria-label={p.isFavorite ? `Ta bort ${p.name} från favoriter` : `Lägg till ${p.name} som favorit`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleFavorite(p.id);
+                        }}
+                        className={`rounded-sm p-0.5 transition-opacity ${
+                          p.isFavorite
+                            ? "text-amber-400 hover:bg-amber-400/10"
+                            : "text-muted-foreground opacity-0 hover:bg-accent hover:text-amber-400 group-hover/item:opacity-100"
+                        }`}
+                      >
+                        <Star className={`h-3.5 w-3.5 ${p.isFavorite ? "fill-current" : ""}`} />
+                      </button>
                       <button
                         aria-label={`Flytta upp ${p.name}`}
                         disabled={i === 0}
@@ -134,7 +224,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                           e.stopPropagation();
                           onMove(p.id, "up");
                         }}
-                        className="rounded-sm p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+                        className="rounded-sm p-0.5 text-muted-foreground opacity-0 hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent group-hover/item:opacity-100"
                       >
                         <ChevronUp className="h-3.5 w-3.5" />
                       </button>
@@ -145,7 +235,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                           e.stopPropagation();
                           onMove(p.id, "down");
                         }}
-                        className="rounded-sm p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+                        className="rounded-sm p-0.5 text-muted-foreground opacity-0 hover:bg-accent hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent group-hover/item:opacity-100"
                       >
                         <ChevronDown className="h-3.5 w-3.5" />
                       </button>
@@ -155,7 +245,7 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
                           e.stopPropagation();
                           if (confirm(`Ta bort "${p.name}"?`)) onRemove(p.id);
                         }}
-                        className="rounded-sm p-0.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
+                        className="rounded-sm p-0.5 text-muted-foreground opacity-0 hover:bg-destructive/20 hover:text-destructive group-hover/item:opacity-100"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -170,6 +260,34 @@ export function AppSidebar({ country, onCountryChange, projects, selectedId, onS
 
       <SidebarFooter className="border-t border-sidebar-border">
         <div className="flex flex-col gap-1 p-2">
+          {isAdmin && (
+            <>
+              <Link
+                to="/stats"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 group-data-[collapsible=icon]:justify-center"
+              >
+                <BarChart3 className="h-3.5 w-3.5" />
+                <span className="group-data-[collapsible=icon]:hidden">Statistik</span>
+              </Link>
+              <button
+                onClick={signOut}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center"
+                title={user?.email ?? undefined}
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="truncate group-data-[collapsible=icon]:hidden">Logga ut</span>
+              </button>
+            </>
+          )}
+          {!isAdmin && user && (
+            <Link
+              to="/auth"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center"
+            >
+              <LogIn className="h-3.5 w-3.5" />
+              <span className="group-data-[collapsible=icon]:hidden">Byt konto</span>
+            </Link>
+          )}
           <button
             onClick={() => setAddExpanded((v) => !v)}
             className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"

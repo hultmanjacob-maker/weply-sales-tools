@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, LayoutGrid, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import type { Project } from "@/hooks/useProjects";
 
 type Props = {
@@ -9,10 +10,12 @@ type Props = {
 };
 
 const LOAD_TIMEOUT_MS = 6000;
+const VIEW_LOG_DELAY_MS = 2000;
 
 export function ProjectViewer({ project, onAddClick }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const logTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!project) return;
@@ -21,8 +24,21 @@ export function ProjectViewer({ project, onAddClick }: Props) {
     timeoutRef.current = setTimeout(() => {
       setStatus((s) => (s === "loading" ? "error" : s));
     }, LOAD_TIMEOUT_MS);
+
+    // Fire-and-forget view logging after a short dwell.
+    if (logTimerRef.current) clearTimeout(logTimerRef.current);
+    logTimerRef.current = setTimeout(() => {
+      supabase
+        .from("project_views")
+        .insert({ project_id: project.id })
+        .then(({ error }) => {
+          if (error) console.warn("view log failed", error.message);
+        });
+    }, VIEW_LOG_DELAY_MS);
+
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (logTimerRef.current) clearTimeout(logTimerRef.current);
     };
   }, [project?.id, project?.url]);
 
@@ -96,7 +112,6 @@ export function ProjectViewer({ project, onAddClick }: Props) {
                   timeoutRef.current = setTimeout(() => {
                     setStatus((s) => (s === "loading" ? "error" : s));
                   }, LOAD_TIMEOUT_MS);
-                  // force iframe reload by remounting via key change trick
                   const el = document.querySelector<HTMLIFrameElement>(
                     `iframe[title="${CSS.escape(project.name)}"]`,
                   );
