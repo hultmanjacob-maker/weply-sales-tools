@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
+import { Route as ApiPublicResetPwRouteImport } from './routes/api/public/reset-pw'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -33,16 +34,23 @@ const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicResetPwRoute = ApiPublicResetPwRouteImport.update({
+  id: '/api/public/reset-pw',
+  path: '/api/public/reset-pw',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/stats': typeof AuthenticatedStatsRoute
+  '/api/public/reset-pw': typeof ApiPublicResetPwRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/stats': typeof AuthenticatedStatsRoute
+  '/api/public/reset-pw': typeof ApiPublicResetPwRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,19 +58,27 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
+  '/api/public/reset-pw': typeof ApiPublicResetPwRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/stats'
+  fullPaths: '/' | '/auth' | '/stats' | '/api/public/reset-pw'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/stats'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/stats'
+  to: '/' | '/auth' | '/stats' | '/api/public/reset-pw'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/stats'
+    | '/api/public/reset-pw'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicResetPwRoute: typeof ApiPublicResetPwRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -95,6 +111,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStatsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/reset-pw': {
+      id: '/api/public/reset-pw'
+      path: '/api/public/reset-pw'
+      fullPath: '/api/public/reset-pw'
+      preLoaderRoute: typeof ApiPublicResetPwRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -113,7 +136,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicResetPwRoute: ApiPublicResetPwRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
