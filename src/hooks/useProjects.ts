@@ -9,12 +9,21 @@ export type Project = {
   url: string;
   country: Country;
   createdAt: number;
+  isFavorite: boolean;
 };
 
 const SELECTED_KEY_PREFIX = "sales-platform.selectedProjectId.v2.";
 const LEGACY_STORAGE_KEY = "sales-platform.projects.v1";
 
-type Row = { id: string; name: string; url: string; country: string; created_at: string; position: number };
+type Row = {
+  id: string;
+  name: string;
+  url: string;
+  country: string;
+  created_at: string;
+  position: number;
+  is_favorite: boolean;
+};
 
 function rowToProject(r: Row): Project {
   return {
@@ -23,6 +32,7 @@ function rowToProject(r: Row): Project {
     url: r.url,
     country: (r.country as Country) ?? "SE",
     createdAt: new Date(r.created_at).getTime(),
+    isFavorite: !!r.is_favorite,
   };
 }
 
@@ -54,7 +64,6 @@ export function useProjects(country: Country) {
       const list = await load(country);
       if (!active) return;
 
-      // One-time legacy migration (only when loading SE, since legacy had no country)
       if (country === "SE" && typeof window !== "undefined") {
         try {
           const raw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -172,6 +181,21 @@ export function useProjects(country: Country) {
     [projects, country, load],
   );
 
+  const toggleFavorite = useCallback(
+    async (id: string) => {
+      const current = projects.find((p) => p.id === id);
+      if (!current) return;
+      const next = !current.isFavorite;
+      setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, isFavorite: next } : p)));
+      const { error } = await supabase.from("projects").update({ is_favorite: next }).eq("id", id);
+      if (error) {
+        console.error("Failed to toggle favorite", error);
+        setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, isFavorite: !next } : p)));
+      }
+    },
+    [projects],
+  );
+
   const selected = projects.find((p) => p.id === selectedId) ?? null;
 
   return {
@@ -182,6 +206,41 @@ export function useProjects(country: Country) {
     addProject,
     removeProject,
     moveProject,
+    toggleFavorite,
     hydrated,
   };
+}
+
+// Cross-country favorites hook — powers the "Snabbstart / Favoriter" section.
+export function useFavorites() {
+  const [favorites, setFavorites] = useState<Project[]>([]);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("is_favorite", true)
+      .order("country", { ascending: true })
+      .order("position", { ascending: true });
+    if (error) {
+      console.error("Failed to load favorites", error);
+      return;
+    }
+    setFavorites((data as Row[] | null)?.map(rowToProject) ?? []);
+  }, []);
+
+  useEffect(() => {
+    load();
+    const channel = supabase
+      .channel("favorites-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => {
+        load();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [load]);
+
+  return favorites;
 }
