@@ -35,7 +35,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
       title={project.name}
       className="h-full w-full border-0 bg-background"
       sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"
-      allow="clipboard-read; clipboard-write; fullscreen"
+      allow="clipboard-read *; clipboard-write *; fullscreen *"
     />
   );
 }
