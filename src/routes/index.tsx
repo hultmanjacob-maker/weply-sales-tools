@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { LogOut } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProjectViewer, OpenInNewTabButton } from "@/components/ProjectViewer";
 import { AddProjectDialog } from "@/components/AddProjectDialog";
 import { useProjects, type Country } from "@/hooks/useProjects";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,21 +17,37 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Samla och visa alla dina Lovable-säljprojekt på ett ställe." },
     ],
   }),
-  component: Dashboard,
+  component: DashboardGate,
 });
 
-const COUNTRIES: { code: Country; label: string; flag: string }[] = [
-  { code: "SE", label: "Sweden", flag: "🇸🇪" },
-  { code: "NO", label: "Norway", flag: "🇳🇴" },
-  { code: "DK", label: "Denmark", flag: "🇩🇰" },
-  { code: "NL", label: "Netherlands", flag: "🇳🇱" },
-];
+function DashboardGate() {
+  const navigate = useNavigate();
+  const { user, isReady } = useAuth();
+
+  useEffect(() => {
+    if (isReady && !user) {
+      navigate({ to: "/auth" });
+    }
+  }, [isReady, user, navigate]);
+
+  if (!isReady) {
+    return <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Laddar…</div>;
+  }
+  if (!user) return null;
+  return <Dashboard />;
+}
 
 function Dashboard() {
   const [country, setCountry] = useState<Country>("NO");
   const { projects, selected, selectedId, setSelectedId, addProject, removeProject, moveProject, hydrated } =
     useProjects(country);
   const [addOpen, setAddOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/auth" });
+  };
 
   return (
     <SidebarProvider
