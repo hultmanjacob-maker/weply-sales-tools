@@ -24,6 +24,7 @@ function Dashboard() {
     selectedId,
     setSelectedId,
     addProject,
+    updateProject,
     removeProject,
     moveProject,
     toggleFavorite,
