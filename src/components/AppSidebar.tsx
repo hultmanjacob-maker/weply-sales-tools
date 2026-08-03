@@ -322,6 +322,15 @@ export function AppSidebar({
       </SidebarFooter>
 
       <AddProjectDialog open={open} onOpenChange={setOpen} onAdd={onAdd} />
+      <AddProjectDialog
+        open={!!editProject}
+        onOpenChange={(o) => {
+          if (!o) setEditProject(null);
+        }}
+        onAdd={onAdd}
+        project={editProject}
+        onUpdate={onUpdate}
+      />
     </Sidebar>
   );
 }
