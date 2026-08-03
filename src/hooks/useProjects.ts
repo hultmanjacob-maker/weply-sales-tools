@@ -182,7 +182,7 @@ export function useProjects(country: Country) {
       id: string,
       patch: { name?: string; url?: string | null; imagePath?: string | null },
     ) => {
-      const payload: Record<string, unknown> = {};
+      const payload: { name?: string; url?: string | null; image_url?: string | null } = {};
       if (patch.name !== undefined) payload.name = patch.name.trim();
       if (patch.url !== undefined) payload.url = patch.url ? patch.url.trim() : null;
       if (patch.imagePath !== undefined) payload.image_url = patch.imagePath;
