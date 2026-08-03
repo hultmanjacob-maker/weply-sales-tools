@@ -41,7 +41,11 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onSelectFavorite: (project: Project) => void;
-  onAdd: (name: string, url: string) => void;
+  onAdd: (name: string, url: string | null, imagePath?: string | null) => void;
+  onUpdate: (
+    id: string,
+    patch: { name?: string; url?: string | null; imagePath?: string | null },
+  ) => void;
   onRemove: (id: string) => void;
   onMove: (id: string, direction: "up" | "down") => void;
   onToggleFavorite: (id: string) => void;
@@ -55,11 +59,13 @@ export function AppSidebar({
   onSelect,
   onSelectFavorite,
   onAdd,
+  onUpdate,
   onRemove,
   onMove,
   onToggleFavorite,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [editProject, setEditProject] = useState<Project | null>(null);
   const [addExpanded, setAddExpanded] = useState(false);
   const favorites = useFavorites();
   const { isAdmin, user, signOut } = useAuth();
