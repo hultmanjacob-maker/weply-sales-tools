@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight, Star, BarChart3, LogIn, LogOut } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight, Star, BarChart3, LogIn, LogOut, Pencil } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import {
   Sidebar,
