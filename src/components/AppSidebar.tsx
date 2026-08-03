@@ -192,7 +192,7 @@ export function AppSidebar({
                       isActive={isActive}
                       onClick={() => onSelect(p.id)}
                       tooltip={p.name}
-                      className={`h-auto items-start gap-3 rounded-lg py-2 pr-24 transition-all ${
+                      className={`h-auto items-start gap-3 rounded-lg py-2 pr-28 transition-all ${
                         isActive
                           ? "border border-white/10 bg-white/[0.06] shadow-sm"
                           : "border border-transparent hover:bg-white/[0.04]"
