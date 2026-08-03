@@ -1,34 +1,32 @@
-# Plan: Favoriter + Statistik
+# Redigera projekt: byt URL eller ladda upp en bild
 
-Bygger enligt design-riktning **"Minimalistisk admin"** (v2) — passar den nuvarande mörka, täta sidebaren utan att rita om chrome.
+## Vad du får
 
-## 1. Favoriter (delat, publikt)
+- **Redigera-knapp** på varje projekt i sidopanelen (vid pilarna/stjärnan). Öppnar en dialog med **Namn**, **URL** och **Bild**.
+- **URL kan ändras** i efterhand — inget behov av att ta bort och lägga till projektet igen.
+- **Bilduppladdning** (t.ex. en skärmdump). Bilden visas i högra vyn i stället för den inbäddade sidan.
+- **Regeln du bad om:** är bara ett av fälten ifyllt används det ifyllda. Är båda ifyllda visas den inbäddade sidan (URL), och om den inte kan laddas visas bilden automatiskt som reserv i stället för dagens felmeddelande.
+- Minst ett av fälten måste vara ifyllt när man sparar (annars finns inget att visa).
+- Bilden kan tas bort igen i samma dialog.
 
-- Migration: `projects.is_favorite boolean not null default false`.
-- `useProjects`: lägg till `toggleFavorite(id)` och en query som hämtar alla favoriter oavsett land (utan `.eq("country", …)`). Realtime-kanalen som redan finns täcker uppdateringar.
-- Sidebar (`AppSidebar`): ny sektion **⭐ Favoriter** överst, ovanför landstabbarna. Varje rad = emoji-tile + projektnamn + liten landchip (NO/SE/DK/NL). Klick väljer projektet och byter automatiskt aktivt land vid behov.
-- I den vanliga projektlistan: liten stjärnikon som visas vid hover och togglar favorit.
+## Så visas det
 
-## 2. Statistik (admin-only)
+```text
+URL ifylld, bild tom      -> inbäddad sida (som idag)
+URL tom, bild ifylld      -> bilden i full storlek
+båda ifyllda              -> inbäddad sida; faller tillbaka till bilden om den blockeras
+```
 
-- Migration: `project_views (project_id fk cascade, viewed_at timestamptz default now())`.
-  - RLS: `INSERT` tillåten för `anon`+`authenticated` (för fire-and-forget-loggning). `SELECT` endast för inloggade admins via `has_role(auth.uid(),'admin')`.
-  - Standardtabeller för `app_role` enum, `user_roles` och `has_role`-funktionen (security definer) enligt best practice.
-- Loggning: `ProjectViewer` skickar en insert när ett projekt visats > ~2 s. Ingen IP/UA/session sparas.
-- Ny publik route `/auth`: enkel e-post + lösenord (signup avstängt — admins skapas manuellt i backend). Ingen sidebar/dashboard-inloggning krävs för vanliga användare.
-- Ny skyddad route `_authenticated/stats.tsx`:
-  - Använder integration-managed `_authenticated/route.tsx` (redirect till `/auth` om ej inloggad).
-  - Extra check i loadern: om användaren ej har `admin`-roll → visa "Ingen åtkomst".
-  - Server function (`requireSupabaseAuth`) aggregerar `project_views` joinat mot `projects`: Land, Projekt, Visningar totalt, 7d, Senast visad. Sorterbar tabell, filterchips (7d / 30d / Allt).
-- Sidebar-footer: när inloggad admin → visa "📊 Statistik" + "Logga ut". Annars inget (håller UI:t rent för säljare).
+"Öppna i ny flik"-knappen visas bara när projektet har en URL.
 
-## 3. Ingen retention (för nu)
+## Teknisk del
 
-Behåller alla views tills vidare — kan läggas till senare som cron om volymen blir stor.
-
-## Tekniska detaljer
-
-- Två migrationer (favorit-kolumn, sedan roles + views + policies).
-- Nya filer: `src/hooks/useAuth.ts`, `src/routes/auth.tsx`, `src/routes/_authenticated/stats.tsx`, `src/lib/stats.functions.ts`, `src/lib/favorites.functions.ts` (eller utökar `useProjects`).
-- Uppdaterar: `AppSidebar.tsx`, `ProjectViewer.tsx`, `src/start.ts` (bearer-middleware om ej redan aktiv).
-- Admin-konto: skapas manuellt i backend efteråt (Authentication → Users → Add user + insert i `user_roles`).
+1. **Databas (migration):**
+   - `projects.image_url text` (nullable).
+   - `projects.url` görs nullable så bild-bara-projekt kan sparas.
+2. **Lagring:** publik bucket `project-images` med policyer som tillåter uppladdning/läsning i linje med appens nuvarande öppna läge (ingen inloggning).
+3. **`useProjects`:** nytt `imageUrl`-fält i `Project`, ny `updateProject(id, { name, url, imageUrl })`, `url` blir `string | null`.
+4. **Ny komponent `EditProjectDialog.tsx`:** återanvänder URL-normaliseringen från `AddProjectDialog`, filväljare som laddar upp till bucketen och sparar publik URL. Validering: minst namn + (URL eller bild).
+5. **`AppSidebar.tsx`:** redigera-ikon per projektrad, kopplad till dialogen.
+6. **`ProjectViewer.tsx`:** väljer iframe eller `<img>` enligt regeln ovan; vid iframe-fel/timeout visas bilden om den finns, annars nuvarande fallback.
+7. **`AddProjectDialog.tsx`:** samma valfria bildfält vid skapande.
