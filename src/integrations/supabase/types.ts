@@ -45,28 +45,31 @@ export type Database = {
           country: string
           created_at: string
           id: string
+          image_url: string | null
           is_favorite: boolean
           name: string
           position: number
-          url: string
+          url: string | null
         }
         Insert: {
           country?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_favorite?: boolean
           name: string
           position?: number
-          url: string
+          url?: string | null
         }
         Update: {
           country?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_favorite?: boolean
           name?: string
           position?: number
-          url?: string
+          url?: string | null
         }
         Relationships: []
       }

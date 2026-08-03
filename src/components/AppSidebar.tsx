@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight, Star, BarChart3, LogIn, LogOut } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight, Star, BarChart3, LogIn, LogOut, Pencil } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import {
   Sidebar,
@@ -41,7 +41,11 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onSelectFavorite: (project: Project) => void;
-  onAdd: (name: string, url: string) => void;
+  onAdd: (name: string, url: string | null, imagePath?: string | null) => void;
+  onUpdate: (
+    id: string,
+    patch: { name?: string; url?: string | null; imagePath?: string | null },
+  ) => void;
   onRemove: (id: string) => void;
   onMove: (id: string, direction: "up" | "down") => void;
   onToggleFavorite: (id: string) => void;
@@ -55,11 +59,13 @@ export function AppSidebar({
   onSelect,
   onSelectFavorite,
   onAdd,
+  onUpdate,
   onRemove,
   onMove,
   onToggleFavorite,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [editProject, setEditProject] = useState<Project | null>(null);
   const [addExpanded, setAddExpanded] = useState(false);
   const favorites = useFavorites();
   const { isAdmin, user, signOut } = useAuth();
@@ -186,7 +192,7 @@ export function AppSidebar({
                       isActive={isActive}
                       onClick={() => onSelect(p.id)}
                       tooltip={p.name}
-                      className={`h-auto items-start gap-3 rounded-lg py-2 pr-24 transition-all ${
+                      className={`h-auto items-start gap-3 rounded-lg py-2 pr-28 transition-all ${
                         isActive
                           ? "border border-white/10 bg-white/[0.06] shadow-sm"
                           : "border border-transparent hover:bg-white/[0.04]"
@@ -203,6 +209,16 @@ export function AppSidebar({
                       </span>
                     </SidebarMenuButton>
                     <div className="absolute right-1 top-1.5 flex items-center gap-0.5 group-data-[collapsible=icon]:!hidden">
+                      <button
+                        aria-label={`Redigera ${p.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditProject(p);
+                        }}
+                        className="rounded-sm p-0.5 text-muted-foreground opacity-0 hover:bg-accent hover:text-foreground group-hover/item:opacity-100"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
                       <button
                         aria-label={p.isFavorite ? `Ta bort ${p.name} från favoriter` : `Lägg till ${p.name} som favorit`}
                         onClick={(e) => {
@@ -316,6 +332,15 @@ export function AppSidebar({
       </SidebarFooter>
 
       <AddProjectDialog open={open} onOpenChange={setOpen} onAdd={onAdd} />
+      <AddProjectDialog
+        open={!!editProject}
+        onOpenChange={(o) => {
+          if (!o) setEditProject(null);
+        }}
+        onAdd={onAdd}
+        project={editProject}
+        onUpdate={onUpdate}
+      />
     </Sidebar>
   );
 }

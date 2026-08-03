@@ -6,11 +6,38 @@ export type Country = "SE" | "NO" | "DK" | "NL";
 export type Project = {
   id: string;
   name: string;
-  url: string;
+  url: string | null;
+  imagePath: string | null;
   country: Country;
   createdAt: number;
   isFavorite: boolean;
 };
+
+export const PROJECT_IMAGE_BUCKET = "project-images";
+
+export async function getProjectImageUrl(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage
+    .from(PROJECT_IMAGE_BUCKET)
+    .createSignedUrl(path, 60 * 60 * 8);
+  if (error) {
+    console.error("Failed to sign image url", error);
+    return null;
+  }
+  return data?.signedUrl ?? null;
+}
+
+export async function uploadProjectImage(file: File): Promise<string | null> {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+  const path = `${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage
+    .from(PROJECT_IMAGE_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type || undefined });
+  if (error) {
+    console.error("Failed to upload image", error);
+    return null;
+  }
+  return path;
+}
 
 const SELECTED_KEY_PREFIX = "sales-platform.selectedProjectId.v2.";
 const LEGACY_STORAGE_KEY = "sales-platform.projects.v1";
@@ -18,7 +45,8 @@ const LEGACY_STORAGE_KEY = "sales-platform.projects.v1";
 type Row = {
   id: string;
   name: string;
-  url: string;
+  url: string | null;
+  image_url: string | null;
   country: string;
   created_at: string;
   position: number;
@@ -29,7 +57,8 @@ function rowToProject(r: Row): Project {
   return {
     id: r.id,
     name: r.name,
-    url: r.url,
+    url: r.url ?? null,
+    imagePath: r.image_url ?? null,
     country: (r.country as Country) ?? "SE",
     createdAt: new Date(r.created_at).getTime(),
     isFavorite: !!r.is_favorite,
@@ -123,11 +152,17 @@ export function useProjects(country: Country) {
   );
 
   const addProject = useCallback(
-    async (name: string, url: string) => {
+    async (name: string, url: string | null, imagePath?: string | null) => {
       const nextPos = projects.length;
       const { data, error } = await supabase
         .from("projects")
-        .insert({ name: name.trim(), url: url.trim(), country, position: nextPos })
+        .insert({
+          name: name.trim(),
+          url: url ? url.trim() : null,
+          image_url: imagePath ?? null,
+          country,
+          position: nextPos,
+        })
         .select()
         .single();
       if (error || !data) {
@@ -140,6 +175,37 @@ export function useProjects(country: Country) {
       return project;
     },
     [country, projects.length, setSelectedId],
+  );
+
+  const updateProject = useCallback(
+    async (
+      id: string,
+      patch: { name?: string; url?: string | null; imagePath?: string | null },
+    ) => {
+      const payload: { name?: string; url?: string | null; image_url?: string | null } = {};
+      if (patch.name !== undefined) payload.name = patch.name.trim();
+      if (patch.url !== undefined) payload.url = patch.url ? patch.url.trim() : null;
+      if (patch.imagePath !== undefined) payload.image_url = patch.imagePath;
+      const { error } = await supabase.from("projects").update(payload).eq("id", id);
+      if (error) {
+        console.error("Failed to update project", error);
+        return false;
+      }
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                name: patch.name !== undefined ? patch.name.trim() : p.name,
+                url: patch.url !== undefined ? (patch.url ? patch.url.trim() : null) : p.url,
+                imagePath: patch.imagePath !== undefined ? patch.imagePath : p.imagePath,
+              }
+            : p,
+        ),
+      );
+      return true;
+    },
+    [],
   );
 
   const removeProject = useCallback(
@@ -204,6 +270,7 @@ export function useProjects(country: Country) {
     selectedId,
     setSelectedId,
     addProject,
+    updateProject,
     removeProject,
     moveProject,
     toggleFavorite,

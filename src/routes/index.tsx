@@ -24,6 +24,7 @@ function Dashboard() {
     selectedId,
     setSelectedId,
     addProject,
+    updateProject,
     removeProject,
     moveProject,
     toggleFavorite,
@@ -61,6 +62,7 @@ function Dashboard() {
           onSelect={setSelectedId}
           onSelectFavorite={handleSelectFavorite}
           onAdd={addProject}
+          onUpdate={updateProject}
           onRemove={removeProject}
           onMove={moveProject}
           onToggleFavorite={toggleFavorite}
