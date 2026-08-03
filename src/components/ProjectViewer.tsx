@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink, LayoutGrid, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import type { Project } from "@/hooks/useProjects";
+import { getProjectImageUrl, type Project } from "@/hooks/useProjects";
 
 type Props = {
   project: Project | null;
@@ -14,16 +14,35 @@ const VIEW_LOG_DELAY_MS = 2000;
 
 export function ProjectViewer({ project, onAddClick }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hasUrl = !!project?.url;
+  const hasImage = !!project?.imagePath;
+
+  // Resolve a signed URL for the uploaded screenshot, if any.
+  useEffect(() => {
+    let active = true;
+    setImageSrc(null);
+    if (!project?.imagePath) return;
+    getProjectImageUrl(project.imagePath).then((url) => {
+      if (active) setImageSrc(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, [project?.id, project?.imagePath]);
 
   useEffect(() => {
     if (!project) return;
     setStatus("loading");
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setStatus((s) => (s === "loading" ? "error" : s));
-    }, LOAD_TIMEOUT_MS);
+    if (hasUrl) {
+      timeoutRef.current = setTimeout(() => {
+        setStatus((s) => (s === "loading" ? "error" : s));
+      }, LOAD_TIMEOUT_MS);
+    }
 
     // Fire-and-forget view logging after a short dwell.
     if (logTimerRef.current) clearTimeout(logTimerRef.current);
@@ -40,7 +59,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (logTimerRef.current) clearTimeout(logTimerRef.current);
     };
-  }, [project?.id, project?.url]);
+  }, [project?.id, project?.url, hasUrl]);
 
   const handleLoad = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -72,11 +91,42 @@ export function ProjectViewer({ project, onAddClick }: Props) {
     );
   }
 
+  // Image-only project, or URL that failed to load with an image available as fallback.
+  const showImage = hasImage && (!hasUrl || status === "error");
+
+  if (showImage) {
+    return (
+      <div className="flex h-full w-full items-center justify-center overflow-auto bg-background p-2">
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={project.name}
+            className="max-h-full max-w-full object-contain"
+          />
+        ) : (
+          <div className="h-full w-full" />
+        )}
+      </div>
+    );
+  }
+
+  if (!hasUrl) {
+    return (
+      <div className="flex h-full w-full items-center justify-center p-10 text-center">
+        <p className="text-sm text-muted-foreground">
+          Det här projektet har varken URL eller bild. Redigera projektet i sidopanelen.
+        </p>
+      </div>
+    );
+  }
+
+  const url = project.url as string;
+
   return (
     <div className="relative h-full w-full">
       <iframe
         key={project.id}
-        src={project.url}
+        src={url}
         title={project.name}
         onLoad={handleLoad}
         onError={handleError}
@@ -99,7 +149,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               <Button asChild>
-                <a href={project.url} target="_blank" rel="noopener noreferrer">
+                <a href={url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
                   Öppna i ny flik
                 </a>
@@ -115,7 +165,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
                   const el = document.querySelector<HTMLIFrameElement>(
                     `iframe[title="${CSS.escape(project.name)}"]`,
                   );
-                  if (el) el.src = project.url;
+                  if (el) el.src = url;
                 }}
               >
                 Försök igen
@@ -129,6 +179,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
 }
 
 export function OpenInNewTabButton({ project }: { project: Project }) {
+  if (!project.url) return null;
   return (
     <a
       href={project.url}
