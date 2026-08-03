@@ -210,6 +210,16 @@ export function AppSidebar({
                     </SidebarMenuButton>
                     <div className="absolute right-1 top-1.5 flex items-center gap-0.5 group-data-[collapsible=icon]:!hidden">
                       <button
+                        aria-label={`Redigera ${p.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditProject(p);
+                        }}
+                        className="rounded-sm p-0.5 text-muted-foreground opacity-0 hover:bg-accent hover:text-foreground group-hover/item:opacity-100"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
                         aria-label={p.isFavorite ? `Ta bort ${p.name} från favoriter` : `Lägg till ${p.name} som favorit`}
                         onClick={(e) => {
                           e.stopPropagation();
