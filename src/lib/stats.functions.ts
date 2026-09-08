@@ -26,12 +26,25 @@ export const getProjectStats = createServerFn({ method: "GET" })
       throw new Response("Forbidden: admin only", { status: 403 });
     }
 
-    const [{ data: projects, error: pErr }, { data: views, error: vErr }] = await Promise.all([
-      supabase.from("projects").select("id, name, country"),
-      supabase.from("project_views").select("project_id, viewed_at"),
-    ]);
+    const { data: projects, error: pErr } = await supabase
+      .from("projects")
+      .select("id, name, country");
     if (pErr) throw pErr;
-    if (vErr) throw vErr;
+
+    // Page through all views — a single select is capped at 1000 rows.
+    const PAGE = 1000;
+    const views: { project_id: string; viewed_at: string }[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from("project_views")
+        .select("project_id, viewed_at")
+        .order("viewed_at", { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      views.push(...(data ?? []));
+      if (!data || data.length < PAGE) break;
+    }
+
 
     const now = Date.now();
     const DAY = 86_400_000;
