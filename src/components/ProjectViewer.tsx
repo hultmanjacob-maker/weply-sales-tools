@@ -64,6 +64,24 @@ export function ProjectViewer({ project, onAddClick }: Props) {
     };
   }, [project?.id, project?.url, hasUrl]);
 
+  // Ask the target site up front whether it allows being embedded.
+  const runCheck = useServerFn(checkEmbeddable);
+  const { data: embedCheck } = useQuery({
+    queryKey: ["embeddable", project?.url ?? null],
+    queryFn: () => runCheck({ data: { url: project!.url as string } }),
+    enabled: hasUrl,
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
+  const blocked = embedCheck?.known === true && embedCheck.embeddable === false;
+
+  useEffect(() => {
+    if (blocked) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setStatus("error");
+    }
+  }, [blocked, project?.id]);
+
   const handleLoad = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setStatus("ready");
