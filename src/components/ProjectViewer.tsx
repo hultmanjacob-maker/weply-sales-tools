@@ -145,6 +145,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
 
   return (
     <div className="relative h-full w-full">
+      {!blocked && (
       <iframe
         key={project.id}
         src={url}
