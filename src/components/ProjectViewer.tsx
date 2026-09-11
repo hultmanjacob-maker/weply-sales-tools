@@ -156,6 +156,8 @@ export function ProjectViewer({ project, onAddClick }: Props) {
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"
         allow="clipboard-read *; clipboard-write *; fullscreen *"
       />
+      )}
+
 
       {status === "error" && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/95 p-6 backdrop-blur-sm">
