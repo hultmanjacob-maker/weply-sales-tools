@@ -199,6 +199,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
               >
                 Försök igen
               </Button>
+              )}
             </div>
           </div>
         </div>
