@@ -166,10 +166,14 @@ export function ProjectViewer({ project, onAddClick }: Props) {
               <AlertTriangle className="h-5 w-5" />
             </div>
             <h2 className="text-lg font-semibold tracking-tight">
-              Kunde inte läsa in projektet i den här vyn
+              {blocked
+                ? "Det här projektet tillåter inte visning här"
+                : "Kunde inte läsa in projektet i den här vyn"}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Projektet kan blockera inbäddning eller ta för lång tid att svara. Öppna det i en ny flik för att visa det i full storlek.
+              {blocked
+                ? "Projektet har en säkerhetsinställning som blockerar visning inuti en annan sida. Öppna det i en ny flik för att använda det i full storlek."
+                : "Projektet kan blockera inbäddning eller ta för lång tid att svara. Öppna det i en ny flik för att visa det i full storlek."}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               <Button asChild>
