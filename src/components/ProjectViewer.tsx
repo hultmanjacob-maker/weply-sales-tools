@@ -182,6 +182,7 @@ export function ProjectViewer({ project, onAddClick }: Props) {
                   Öppna i ny flik
                 </a>
               </Button>
+              {!blocked && (
               <Button
                 variant="outline"
                 onClick={() => {
