@@ -33,16 +33,15 @@ function AuthPage() {
   const onMicrosoftSignIn = async () => {
     setError(null);
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("microsoft", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "azure",
+      options: { redirectTo: window.location.origin },
     });
     setBusy(false);
-    if (result.error) {
-      setError(result.error.message ?? "Microsoft-inloggning misslyckades.");
+    if (error) {
+      setError(error.message ?? "Microsoft-inloggning misslyckades.");
       return;
     }
-    if (result.redirected) return;
-    navigate({ to: "/stats" });
   };
 
   const onSubmit = async (e: React.FormEvent) => {
