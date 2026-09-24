@@ -35,7 +35,7 @@ function AuthPage() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: window.location.origin + "/auth" },
     });
     setBusy(false);
     if (error) {
