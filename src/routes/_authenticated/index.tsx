@@ -6,7 +6,7 @@ import { ProjectViewer, OpenInNewTabButton } from "@/components/ProjectViewer";
 import { AddProjectDialog } from "@/components/AddProjectDialog";
 import { useProjects, type Country, type Project } from "@/hooks/useProjects";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Sales Tools — Dina projekt" },

@@ -26,7 +26,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/stats" });
+      if (data.session) navigate({ to: "/" });
     });
   }, [navigate]);
 
@@ -54,7 +54,7 @@ function AuthPage() {
       setError(error.message);
       return;
     }
-    navigate({ to: "/stats" });
+    navigate({ to: "/" });
   };
 
   return (
