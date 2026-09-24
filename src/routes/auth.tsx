@@ -31,6 +31,21 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  const onMicrosoftSignIn = async () => {
+    setError(null);
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("microsoft", {
+      redirect_uri: window.location.origin,
+    });
+    setBusy(false);
+    if (result.error) {
+      setError(result.error.message ?? "Microsoft-inloggning misslyckades.");
+      return;
+    }
+    if (result.redirected) return;
+    navigate({ to: "/stats" });
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
