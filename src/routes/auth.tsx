@@ -72,6 +72,26 @@ function AuthPage() {
           </p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4 rounded-lg border border-border bg-card/40 p-5">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2"
+            onClick={onMicrosoftSignIn}
+            disabled={busy}
+          >
+            <svg viewBox="0 0 23 23" className="h-4 w-4" aria-hidden>
+              <path fill="#f35325" d="M1 1h10v10H1z" />
+              <path fill="#81bc06" d="M12 1h10v10H12z" />
+              <path fill="#05a6f0" d="M1 12h10v10H1z" />
+              <path fill="#ffba08" d="M12 12h10v10H12z" />
+            </svg>
+            Logga in med Microsoft
+          </Button>
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            eller
+            <span className="h-px flex-1 bg-border" />
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="email">E-post</Label>
             <Input
