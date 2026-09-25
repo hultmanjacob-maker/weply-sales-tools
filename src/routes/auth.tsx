@@ -37,7 +37,7 @@ function AuthPage() {
       provider: "azure",
       options: {
         redirectTo: window.location.origin + "/auth",
-        scopes: "openid profile email",
+        scopes: "openid profile email User.Read",
       },
     });
     setBusy(false);
