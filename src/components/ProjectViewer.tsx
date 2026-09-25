@@ -68,7 +68,14 @@ export function ProjectViewer({ project, onAddClick }: Props) {
   const runCheck = useServerFn(checkEmbeddable);
   const { data: embedCheck } = useQuery({
     queryKey: ["embeddable", project?.url ?? null],
-    queryFn: () => runCheck({ data: { url: project!.url as string } }),
+    queryFn: () =>
+      runCheck({
+        data: {
+          url: project!.url as string,
+          origin:
+            typeof window !== "undefined" ? window.location.origin : "https://localhost",
+        },
+      }),
     enabled: hasUrl,
     staleTime: 10 * 60 * 1000,
     retry: false,

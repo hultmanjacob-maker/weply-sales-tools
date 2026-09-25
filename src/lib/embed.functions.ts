@@ -41,7 +41,7 @@ export const checkEmbeddable = createServerFn({ method: "POST" })
       } catch {
         res = await fetch(data.url, { method: "GET", redirect: "follow", signal: controller.signal });
       }
-      return { embeddable: !isBlocked(res.headers), known: true };
+      return { embeddable: !isBlocked(res.headers, data.origin), known: true };
     } catch {
       // Unknown — let the iframe try as before.
       return { embeddable: true, known: false };
