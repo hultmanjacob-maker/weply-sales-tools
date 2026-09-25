@@ -35,7 +35,10 @@ function AuthPage() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
-      options: { redirectTo: window.location.origin + "/auth" },
+      options: {
+        redirectTo: window.location.origin + "/auth",
+        scopes: "openid profile email",
+      },
     });
     setBusy(false);
     if (error) {
